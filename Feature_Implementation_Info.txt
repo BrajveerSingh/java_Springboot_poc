@@ -1,0 +1,53 @@
+I have used eclipse to develop this feature. I have added gradle plugin to my eclipse to import the project.
+You can unzip the file and can import the project into eclipse as a gradle project.
+
+Below is the brief description of the implementation.
+
+transferFund:
+
+A new method transferFund is implemented in AccountsService calss. This method takes three input parameters:
+ 1. fromAccountId
+ 2. toAccountId
+ 3. transferedAmount
+ 
+This method retrieves fromAccount and toAccount from repository based on accountId receieved. This method calls a new
+helper private method doTransfer. 
+
+	doTransfer:
+
+		The doTransfer method accepts fromAccount, toAccount and fundsToBeTransfered. This method calls a helpwer method validate. 
+	
+	NOTE:	
+		The doTransfer method calls validate, debit, credit and sendNotification methods in a synchronized block. The dabit and credit methods are being added to Account class. Both of these methods are described below. The reason to call sendNotification within the synchronized block is to have logs in sync for debit and credit messages.
+	
+        validate:
+		
+			The validate method checks whether the amount to be transfeered is valid (i.e. positive greater than zero value)or not. If it's value is <=0  then it throws an InvalidTransferredAmountException otherwise returns.
+        
+		Post validate doTransfer method debit the fromAccount and credit the toAccount. If the fromAccount has sufficient balance then a transfer is made otherwise an InSufficientFundsException is thrown. After successful debit and credit the notifications are sent to the owner of fromAccount and toAccount with appropriate messages.
+
+The new debit and credit methods are being added to the Account class. 
+    
+    debit:
+		The debit method accepts amountToBeDebited and have a syncronized block. If the balance - amountToBeDebited is negative then it throws InSufficientFundsException otherwise it decrease the balance by the value balance - amountToBeDebited. 
+	credit:
+        The credit method accepts the amount to be credited. This method also has a synchronize block. This method simply add the amount recieved to the balance.
+=============================================================================================
+Test Cases:
+=============================================================================================
+AccountsServiceTest
+		Many tests are being added for testing fund transfer.
+		
+		Scenarios covered in the tests are:
+			1. Invalid Fund Transfer Amount recieved for transferFund request.
+			2. Valid fund transfer
+			3. Insufficient balance in fromAccount
+			4. Multiple sequential requests for funt transfer
+			5. Multiple parallel requests for fund transfer with a fixed transferred amount in each request
+			6. Multiple parallel requests for fund transfer with a variable transferred amount in each request
+			7. Regression Test for 100000 parallel requests [There might need be a change in sleep value. I have
+     		   set it to the best possible to complete all the threads before checking the result.]
+			   
+ NOTE:  I have attached a screenshots of test run in my eclipse IDE. It is a .png file inside zip  
+        directory.			   
+	
